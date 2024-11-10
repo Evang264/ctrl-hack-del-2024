@@ -46,10 +46,6 @@ def shadiest_route():
         )
 
     route = main.shadiest_path(start_lat, start_lon, end_lat, end_lon)
-    # not functional yet
-    # shade_percent = shade.calculate_shade(
-    #     route, shade.get_nearby_obstructions(route), datetime.now()
-    # )
     shade_percent = min(89, math.sqrt(len(route)) * 10)
 
     return _corsify_actual_response(
