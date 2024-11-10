@@ -267,7 +267,7 @@ export default function Home() {
       setIsLoading(true);
       setSteps(null);
 
-      const response = await fetch(`http://127.0.0.1:5000/api/shadiest_route?${new URLSearchParams({
+      const response = await fetch(`http://127.0.0.1:8000/api/shadiest_route?${new URLSearchParams({
         start_lat: start.geometry.location.lat().toString(),
         start_lon: start.geometry.location.lng().toString(),
         end_lat: destination.geometry.location.lat().toString(),
