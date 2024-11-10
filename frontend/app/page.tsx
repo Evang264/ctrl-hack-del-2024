@@ -149,7 +149,12 @@ const summaryStats = [
     name: "Total Distance",
     value: "20 km"
   },
-]
+];
+
+type ShadiestRouteResponse = {
+  route: [number, number][];
+  shade_percent: number;
+}
 
 export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -176,6 +181,8 @@ export default function Home() {
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
 
   const [steps, setSteps] = useState<google.maps.DirectionsStep[] | null>(null);
+  const [pathPoints, setPathPoints] = useState<[number, number][] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // const flightPlanCoordinates = [
   //   { lat: 37.772, lng: -122.214 },
@@ -209,6 +216,10 @@ export default function Home() {
     if ((!startMarker?.position || !destinationMarker?.position) && steps) {
       setSteps(null);
     }
+
+    if ((!startMarker?.position || !destinationMarker?.position) && pathPoints) {
+      setPathPoints(null);
+    }
   }, [start, destination]);
 
   const onStart = async () => {
@@ -219,10 +230,9 @@ export default function Home() {
       destination
     }]);
 
-    // TODO: add API call
+    if (!start.geometry?.location || !destination.geometry?.location) return;
 
     if (!isDevMode) {
-      if (!start.geometry?.location || !destination.geometry?.location) return;
       const service = new google.maps.DirectionsService();
       const response = await service.route({
         origin: start.geometry.location,
@@ -232,6 +242,22 @@ export default function Home() {
       });
 
       setSteps(response.routes[0].legs[0].steps);
+      setPathPoints(null);
+    } else {
+      setIsLoading(true);
+      const response = await fetch(`http://127.0.0.1:5000/api/shadiest_route?${new URLSearchParams({
+        start_lat: start.geometry.location.lat().toString(),
+        start_lon: start.geometry.location.lng().toString(),
+        end_lat: destination.geometry.location.lat().toString(),
+        end_lon: destination.geometry.location.lng().toString()
+      }).toString()}`, {
+        method: "GET"
+      });
+      const data: ShadiestRouteResponse = await response.json();
+
+      setIsLoading(false);
+      setPathPoints(data.route);
+      setSteps(null);
     }
   };
 
@@ -243,7 +269,7 @@ export default function Home() {
     <>
       <main className={clsx(optionsOpen ? "brightness-50" : "")}>
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <Navbar steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
+          <Navbar isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
           <div className="h-screen w-screen">
             <Map
               mapId={'bf51a910020fa25a'}
@@ -265,12 +291,18 @@ export default function Home() {
                   <div className="bg-green-500 w-5 h-5 rounded-full border" />
                 </AdvancedMarker>
               ))} */}
-              {steps && 
+              {steps ? 
                 <Polyline
                   strokeWeight={8}
                   strokeColor={'#0551ffff'}
                   path={steps?.flatMap((step) => step.path)}
-                />
+                /> : (
+                  pathPoints && <Polyline
+                    strokeWeight={8}
+                    strokeColor={'#0551ffff'}
+                    path={pathPoints.map((point) => ({ lat: point[0], lng: point[1] }))}
+                  />
+                )
               }
             </Map>
             <MapHandler start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />

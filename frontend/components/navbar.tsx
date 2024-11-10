@@ -18,9 +18,10 @@ type NavbarProps = {
   canStart: boolean;
   onStart: () => void;
   steps: google.maps.DirectionsStep[] | null;
+  isLoading: boolean;
 };
 
-export default function Navbar({ addStart, addDestination, isDevMode, canStart, onStart, steps }: NavbarProps) {
+export default function Navbar({ isLoading, addStart, addDestination, isDevMode, canStart, onStart, steps }: NavbarProps) {
   const [showNav, setShowNav] = useState(true);
 
   return (
@@ -54,6 +55,7 @@ export default function Navbar({ addStart, addDestination, isDevMode, canStart, 
                 <div className="flex-1" dangerouslySetInnerHTML={{__html: step.instructions}} />
               </div>
             ))}
+            {isLoading && "Loading..."}
           </div>
         </div>
         {canStart && <button onClick={onStart} className={clsx("mb-5 w-4/5 py-2 rounded-2xl border transition", isDevMode ? "text-white bg-devmodeLightBg hover:brightness-125 border-white" : "text-black bg-normalBg border-black hover:brightness-95")}>Start Journey</button>}
