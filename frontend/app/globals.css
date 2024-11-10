@@ -126,3 +126,7 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.scrollbar-black {
+  scrollbar-color: #333 black;
+}

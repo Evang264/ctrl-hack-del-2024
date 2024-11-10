@@ -25,7 +25,7 @@ export default function Navbar({ addStart, addDestination, isDevMode, canStart, 
 
   return (
     <>
-      <div className={clsx(showNav ? "flex" : "hidden", isDevMode ? "bg-devmodeBg" : "bg-normalBg", "justify-between items-center flex-col pt-8 w-{1/3} h-screen fixed z-10 px-5 w-96")}>
+      <div className={clsx(showNav ? "flex" : "hidden", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "justify-between items-center flex-col pt-8 w-{1/3} h-screen fixed z-10 px-5 w-96")}>
         <div>
           <div className="flex gap-x-4 items-center">
             <button onClick={() => setShowNav(false)}>{isDevMode ? <img src="/blue-bars.svg" width="24" height="24" /> : <img src="/bars.svg" width="24" height="24" />}</button>
@@ -43,13 +43,13 @@ export default function Navbar({ addStart, addDestination, isDevMode, canStart, 
             {isDevMode ? <img src="/light-switch.svg" width="20" height="21" /> : <img src="/switch.svg" width="20" height="21" />}
           </div>
 
-          <div className="flex flex-col gap-y-5 mt-5 overflow-auto max-h-[36rem]">
+          <div className={clsx("flex flex-col gap-y-5 mt-5 overflow-auto max-h-[36rem]", { "scrollbar-black": isDevMode })}>
             {steps && steps.map((step, i) => (
               <div key={i} className="flex gap-x-5">
                 <div className="w-5">
-                  {step.instructions.startsWith("Head") && <img src="/head.svg" width="14" height="19" className="ml-1" />}
-                  {(step.instructions.startsWith("Turn <b>right</b>") || step.instructions.startsWith("Slight <b>right</b>")) && <img src="/turn-right.svg" width="24" height="24" />}
-                  {(step.instructions.startsWith("Turn <b>left</b>") || step.instructions.startsWith("Slight <b>left</b>")) && <img src="/turn-left.svg" width="24" height="24" />}
+                  {step.instructions.startsWith("Head") && <img src={isDevMode ? "/dev-head.svg" : "/head.svg"} width="14" height="19" className="ml-1" />}
+                  {(step.instructions.startsWith("Turn <b>right</b>") || step.instructions.startsWith("Slight <b>right</b>")) && <img src={isDevMode ? "/dev-turn-right.svg" : "/turn-right.svg"} width="24" height="24" />}
+                  {(step.instructions.startsWith("Turn <b>left</b>") || step.instructions.startsWith("Slight <b>left</b>")) && <img src={isDevMode ? "/dev-turn-left.svg" : "/turn-left.svg"} width="24" height="24" />}
                 </div>
                 <div className="flex-1" dangerouslySetInnerHTML={{__html: step.instructions}} />
               </div>
