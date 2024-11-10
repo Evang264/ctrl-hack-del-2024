@@ -351,7 +351,7 @@ export default function Home() {
             <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Trips</h2>
           </div>
           <ul>
-            {prevTrips && prevTrips.map((prevTrip, i) => (
+            {prevTrips && prevTrips.slice(-3).toReversed().map((prevTrip, i) => (
               <li key={i} className={clsx("px-3", i !== 0 ? "border-t border-gray-500 py-3" : "pb-3 pt-1")}>
                 <h3>{prevTrip.destination.name}</h3>
                 <p className="opacity-50">{prevTrip.destination.formatted_address?.split(", ").slice(0, -1).join(", ")}</p>
