@@ -255,12 +255,14 @@ export default function Home() {
               fullscreenControl={false}
               mapTypeControl={false}
             >
-              <AdvancedMarker ref={startMarkerRef} position={null} />
+              <AdvancedMarker ref={startMarkerRef} position={null}>
+                <div className="rounded-full bg-white w-5 h-5 border-black border-4" />
+              </AdvancedMarker>
               <AdvancedMarker ref={destinationMarkerRef} position={null} />
               {steps && 
                 <Polyline
-                  strokeWeight={10}
-                  strokeColor={'#ff22cc88'}
+                  strokeWeight={8}
+                  strokeColor={'#0551ffff'}
                   path={steps?.flatMap((step) => step.path)}
                 />
               }
