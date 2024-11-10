@@ -260,11 +260,11 @@ export default function Home() {
                 <div className="rounded-full bg-white w-5 h-5 border-black border-4" />
               </AdvancedMarker>
               <AdvancedMarker ref={destinationMarkerRef} position={null} />
-              {trees.trees.map((tree, i) => (
+              {/* {trees.trees.map((tree, i) => (
                 <AdvancedMarker position={tree} key={i}>
                   <div className="bg-green-500 w-5 h-5 rounded-full border" />
                 </AdvancedMarker>
-              ))}
+              ))} */}
               {steps && 
                 <Polyline
                   strokeWeight={8}
