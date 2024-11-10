@@ -162,7 +162,7 @@ for coord in coords:
         location=coord, popup="Destination", icon=folium.Icon(color="blue")
     ).add_to(m)
 
-with open("trees.csv", "r") as csvfile:
+with open("../frontend/public/trees.csv", "r") as csvfile:
     coord_reader = csv.reader(csvfile)
     for row in coord_reader:
         try:

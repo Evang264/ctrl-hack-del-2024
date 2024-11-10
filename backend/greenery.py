@@ -25,7 +25,7 @@ folium.GeoJson(
 ).add_to(m)
 
 # Plot tree locations as points
-with open("trees.csv", "w", newline="") as csvfile:
+with open("../frontend/public/trees.csv", "w", newline="") as csvfile:
     for _, row in greenery_projected.to_crs(
         epsg=4326
     ).iterrows():  # Convert to WGS84 for folium
