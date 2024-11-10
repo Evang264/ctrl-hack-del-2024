@@ -5,6 +5,7 @@ from shapely.geometry import LineString
 from geopandas.tools import sjoin
 import geopandas as gpd
 import csv
+from pyproj import Transformer
 
 # Example:
 # 43.466464, -80.541752
@@ -16,8 +17,8 @@ import csv
 # lat2 = float(input("Enter latitude of point 2: "))
 # lon2 = float(input("Enter longitude of point 2: "))
 
-lat1, lon1 = 43.466464, -80.541752
-lat2, lon2 = 43.474832, -80.543750
+lat1, lon1 = 43.474322, -80.545152
+lat2, lon2 = 43.471025, -80.545025
 
 point1 = (lat1, lon1)
 point2 = (lat2, lon2)
@@ -119,6 +120,20 @@ route_coords = [
     if i == 0 or route_coords[i] != route_coords[i - 1]
 ]
 
+# Define the UTM zone and whether it's in the northern hemisphere
+utm_zone = 17  # Replace with your UTM zone
+is_northern = True  # True if in the northern hemisphere, False if in the southern
+
+# Create a transformer object
+proj_utm = f"+proj=utm +zone={utm_zone} +{'north' if is_northern else 'south'} +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+proj_wgs84 = "EPSG:4326"
+transformer = Transformer.from_crs(proj_utm, proj_wgs84, always_xy=True)
+
+coords = []
+for coord in route_coords:
+    lon, lat = transformer.transform(coord[0], coord[1])
+    coords.append((lat, lon))
+
 # Add the route to the map
 folium.PolyLine(route_coords, color="blue", weight=5, opacity=0.8).add_to(m)
 
@@ -130,6 +145,11 @@ folium.Marker(
     location=[lat2, lon2], popup="Destination", icon=folium.Icon(color="red")
 ).add_to(m)
 
+for coord in coords:
+    folium.Marker(
+        location=coord, popup="Destination", icon=folium.Icon(color="blue")
+    ).add_to(m)
+
 # Save the map to an HTML file
 m.save("shadiest_route.html")
 
@@ -139,7 +159,7 @@ print("Map saved to shadiest_route.html")
 with open("route_coordinates.csv", "w", newline="") as csvfile:
     coord_writer = csv.writer(csvfile)
     coord_writer.writerow(["latitude", "longitude"])
-    for coord in route_coords:
+    for coord in coords:
         coord_writer.writerow(coord)
 
 print("Route coordinates saved to route_coordinates.csv")
