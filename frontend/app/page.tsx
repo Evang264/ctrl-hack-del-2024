@@ -53,6 +53,7 @@ export default function Home() {
             zoomControl={false}
             streetViewControl={false}
             fullscreenControl={false}
+            mapTypeControl={false}
           >
             <AdvancedMarker ref={startMarkerRef} position={null} />
             <AdvancedMarker ref={destinationMarkerRef} position={null} />
