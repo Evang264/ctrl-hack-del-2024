@@ -12,13 +12,13 @@ from pyproj import Transformer
 # 43.474832, -80.543750
 
 # Input the two coordinates
-lat1 = float(input("Enter latitude of point 1: "))
-lon1 = float(input("Enter longitude of point 1: "))
-lat2 = float(input("Enter latitude of point 2: "))
-lon2 = float(input("Enter longitude of point 2: "))
+# lat1 = float(input("Enter latitude of point 1: "))
+# lon1 = float(input("Enter longitude of point 1: "))
+# lat2 = float(input("Enter latitude of point 2: "))
+# lon2 = float(input("Enter longitude of point 2: "))
 
-# lat1, lon1 = 43.474322, -80.545152
-# lat2, lon2 = 43.471025, -80.545025
+lat1, lon1 = 43.474322, -80.545152
+lat2, lon2 = 43.471025, -80.545025
 
 point1 = (lat1, lon1)
 point2 = (lat2, lon2)
@@ -153,10 +153,17 @@ for coord in coords:
 with open("trees.csv", "r") as csvfile:
     coord_reader = csv.reader(csvfile)
     for row in coord_reader:
-        lat, lon = float(row[0]), float(row[1])
-        folium.CircleMarker(
-            location=[lat, lon], radius=8, color="green", fill=True, fill_opacity=0.6
-        ).add_to(m)
+        try:
+            lat, lon = float(row[0]), float(row[1])
+            folium.CircleMarker(
+                location=[lat, lon],
+                radius=8,
+                color="green",
+                fill=True,
+                fill_opacity=0.6,
+            ).add_to(m)
+        except ValueError:
+            pass
 
 # Save the map to an HTML file
 m.save("shadiest_route.html")
