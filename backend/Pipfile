@@ -12,6 +12,8 @@ scikit-learn = "*"
 geopandas = "*"
 networkx = "*"
 flask = "*"
+googlemaps = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

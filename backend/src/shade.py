@@ -1,9 +1,18 @@
+import googlemaps
+from flask import Flask
+import pytz
 from geopy.distance import geodesic
 from pvlib import solarposition
-import pytz
+import dotenv
+import os
+
+# Initialize Flask app and Google Maps client
+app = Flask(__name__)
+dotenv.load_dotenv()
+gmaps = googlemaps.Client(key=os.getenv("GOOGLEMAPS_API_KEY"))
 
 
-# Calculate the shaded percentage of a given route
+# Function to calculate the shaded percentage of a given route
 def calculate_shade(route, obstructions, date_time):
     shaded_distance = 0
     total_distance = 0
@@ -26,9 +35,6 @@ def calculate_shade(route, obstructions, date_time):
 
 # Function to calculate the sun's position for a given time and location
 def calculate_sun_position(location, date_time):
-    # Location: (latitude, longitude)
-    # Date_time: datetime object
-
     lat, lon = location
     tz = pytz.timezone("America/Toronto")  # Timezone of Waterloo, ON
     date_time = tz.localize(
@@ -80,7 +86,6 @@ def calculate_obstruction_angle(start_point, obstruction_point, sun_pos):
     sun_altitude = sun_pos["altitude"]
 
     # Simplified logic to compare angles - if the obstruction is in the way of the sun
-    # In a more sophisticated model, you would calculate the shadow length and blockage based on sun altitude
     if (
         abs(sun_azimuth - azimuth) < 45 and sun_altitude > 20
     ):  # Check if obstruction is within a blocking range
@@ -97,3 +102,41 @@ def is_obstruction_on_path(start_point, end_point, obstruction):
         geodesic(start_point, obstruction["location"]).meters < 100
         and geodesic(obstruction["location"], end_point).meters < 100
     )
+
+
+# Fetch the route using Google Maps Directions API
+def get_route(start_location, end_location):
+    # Request directions from start_location to end_location
+    directions = gmaps.directions(start_location, end_location, mode="walking")
+
+    # Extract the polyline from the directions response
+    polyline = directions[0]["legs"][0]["steps"]
+
+    # Convert the polyline into a list of (latitude, longitude) coordinates
+    route = []
+    for step in polyline:
+        route.append((step["end_location"]["lat"], step["end_location"]["lng"]))
+
+    return route
+
+
+# Fetch nearby obstructions using Google Places API (e.g., for buildings or trees)
+def get_nearby_obstructions(route):
+    obstructions = []
+    for location in route:
+        places = gmaps.places_nearby(
+            location, radius=100, type="store"
+        )  # Type can be 'building', 'restaurant', etc.
+
+        for place in places["results"]:
+            obstructions.append(
+                {
+                    "location": (
+                        place["geometry"]["location"]["lat"],
+                        place["geometry"]["location"]["lng"],
+                    ),
+                    "type": place["types"],
+                }
+            )
+
+    return obstructions

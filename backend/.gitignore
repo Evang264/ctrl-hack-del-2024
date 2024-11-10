@@ -2,3 +2,4 @@ cache/
 waterloo_shade_map.*
 shadiest_route.html
 route_coordinates.csv
+.env
