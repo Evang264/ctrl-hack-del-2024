@@ -1,7 +1,7 @@
 "use client";
 
 import { AdvancedMarker, APIProvider, Map, MapCameraChangedEvent, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import MapHandler from "@/components/map-handler";
 import { Polyline } from "@/components/polyline";
@@ -10,6 +10,17 @@ import { Label } from "@/components/ui/label";
 import clsx from "clsx";
 
 const defaultLocation = { lat: 43.77211663142969, lng: -79.50660297466334 };
+
+// type PrevLocation = {
+//   name: string;
+//   city: string;
+//   province: string;
+//   country: string;
+// }
+type PrevTrip = {
+  start: google.maps.places.PlaceResult;
+  destination: google.maps.places.PlaceResult;
+}
 
 export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,6 +43,8 @@ export default function Home() {
 
   const [isDevMode, setIsDevMode] = useState<boolean>(false);
 
+  const [prevTrips, setPrevTrips] = useState<PrevTrip[] | null>(null);
+
   const flightPlanCoordinates = [
     { lat: 37.772, lng: -122.214 },
     { lat: 21.291, lng: -157.821 },
@@ -39,10 +52,38 @@ export default function Home() {
     { lat: -27.467, lng: 153.027 },
   ];
 
+  useEffect(() => {
+    if (prevTrips == null) {
+      const storedData = localStorage.getItem("shadefindrHistory");
+
+      let currentData: PrevTrip[];
+      if (storedData === null) {
+        setPrevTrips([]);
+      } else {
+        setPrevTrips(JSON.parse(storedData));
+      }
+    } else {
+      localStorage.setItem("shadefindrHistory", JSON.stringify(prevTrips));
+    }
+
+    console.log("history", localStorage.getItem("shadefindrHistory"));
+  }, [prevTrips])
+
+  const onStart = () => {
+    if (!start || !destination) return;
+
+    setPrevTrips([...prevTrips!, {
+      start,
+      destination
+    }]);
+
+    // TODO: add API call
+  };
+
   return (
     <>
       <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-        <Navbar addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
+        <Navbar onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
         <div className="h-screen w-screen">
           <Map
             mapId={'bf51a910020fa25a'}
