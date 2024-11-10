@@ -1,6 +1,6 @@
 import osmnx as ox
 import folium
-import geopandas as gpd
+import csv
 
 # Define your area and download the graph and greenery data
 location = "Waterloo, Ontario, Canada"
@@ -25,24 +25,29 @@ folium.GeoJson(
 ).add_to(m)
 
 # Plot tree locations as points
-for _, row in greenery_projected.to_crs(
-    epsg=4326
-).iterrows():  # Convert to WGS84 for folium
-    if row.geometry.geom_type == "Point":
-        folium.CircleMarker(
-            location=[row.geometry.y, row.geometry.x],
-            radius=2,
-            color="green",
-            fill=True,
-            fill_opacity=0.6,
-        ).add_to(m)
-    elif row.geometry.geom_type == "Polygon":
-        # Add larger tree clusters as polygons if they exist
-        folium.GeoJson(
-            row.geometry.__geo_interface__,
-            style_function=lambda x: {"color": "green", "weight": 1},
-        ).add_to(m)
+with open("trees.csv", "w", newline="") as csvfile:
+    for _, row in greenery_projected.to_crs(
+        epsg=4326
+    ).iterrows():  # Convert to WGS84 for folium
+        coord_writer = csv.writer(csvfile)
 
-# Save the map to an HTML file and display it
-m.save("waterloo_shade_map.html")
-m
+        coord_writer.writerow(["Latitude", "Longitude"])
+
+        if row.geometry.geom_type == "Point":
+            coord_writer.writerow([row.geometry.y, row.geometry.x])
+            folium.CircleMarker(
+                location=[row.geometry.y, row.geometry.x],
+                radius=5,
+                color="green",
+                fill=True,
+                fill_opacity=0.6,
+            ).add_to(m)
+        # elif row.geometry.geom_type == "Polygon":
+        #     print("polygon found!")
+        #     # Add larger tree clusters as polygons if they exist
+        #     folium.GeoJson(
+        #         row.geometry.__geo_interface__,
+        #         style_function=lambda x: {"color": "green", "weight": 1},
+        #     ).add_to(m)
+
+    m.save("waterloo_shade_map.html")
