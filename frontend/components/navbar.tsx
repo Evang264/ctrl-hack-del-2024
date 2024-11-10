@@ -50,10 +50,12 @@ export default function Navbar({ isShowingPath, onClear, shadePercent, isLoading
           <div className={clsx("flex flex-col gap-y-5 mt-5 overflow-auto max-h-[36rem]", { "scrollbar-black": isDevMode })}>
             {steps && steps.map((step, i) => (
               <div key={i} className="flex gap-x-5">
-                <div className="w-5">
+                <div className="w-5 flex items-center justify-center">
                   {step.instructions.startsWith("Head") && <img src={isDevMode ? "/dev-head.svg" : "/head.svg"} width="14" height="19" className="ml-1" />}
-                  {(step.instructions.startsWith("Turn <b>right</b>") || step.instructions.startsWith("Slight <b>right</b>")) && <img src={isDevMode ? "/dev-turn-right.svg" : "/turn-right.svg"} width="24" height="24" />}
-                  {(step.instructions.startsWith("Turn <b>left</b>") || step.instructions.startsWith("Slight <b>left</b>")) && <img src={isDevMode ? "/dev-turn-left.svg" : "/turn-left.svg"} width="24" height="24" />}
+                  {step.instructions.startsWith("Turn <b>right</b>") && <img src={isDevMode ? "/dev-turn-right.svg" : "/turn-right.svg"} width="24" height="24" />}
+                  {step.instructions.startsWith("Turn <b>left</b>") && <img src={isDevMode ? "/dev-turn-left.svg" : "/turn-left.svg"} width="24" height="24" />}
+                  {step.instructions.startsWith("Slight <b>left</b>") && <img src={isDevMode ? "/dev-arrow-up-left.svg" : "/arrow-up-left.svg"} width="32" height="32" />}
+                  {step.instructions.startsWith("Slight <b>right</b>") && <img src={isDevMode ? "/dev-arrow-up-right.svg" : "/arrow-up-right.svg"} width="32" height="32" />}
                 </div>
                 <div className="flex-1" dangerouslySetInnerHTML={{__html: step.instructions}} />
               </div>
