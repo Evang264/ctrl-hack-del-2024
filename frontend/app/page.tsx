@@ -1,6 +1,6 @@
 "use client";
 
-import { AdvancedMarker, APIProvider, Map, MapCameraChangedEvent, useAdvancedMarkerRef, useMapsLibrary } from "@vis.gl/react-google-maps";
+import { AdvancedMarker, APIProvider, Map, MapCameraChangedEvent, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import MapHandler from "@/components/map-handler";
@@ -210,8 +210,7 @@ export default function Home() {
   useEffect(() => {
     if (prevTrips == null) {
       const storedData = localStorage.getItem("shadefindrHistory");
-
-      let currentData: PrevTrip[];
+      
       if (storedData === null) {
         setPrevTrips([]);
       } else {

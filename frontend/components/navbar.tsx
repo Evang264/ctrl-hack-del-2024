@@ -4,7 +4,6 @@ import clsx from "clsx";
 import localFont from 'next/font/local';
 import PlaceAutocomplete from "./place-autocomplete";
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { useState } from "react";
 
 const departureMono = localFont({
   src: '../app/fonts/DepartureMono-1.422/DepartureMono-Regular.woff2',
