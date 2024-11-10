@@ -346,7 +346,7 @@ export default function Home() {
       {optionsOpen &&
         <aside className={clsx("flex flex-col px-5 py-7", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "h-screen absolute top-0 right-0 w-128")}>
           <button onClick={() => setOptionsOpen(false)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "" : "")}><img src="/X.svg" width="40" height="40" /></button>
-          <div className="flex items-center gap-x-2">
+          <div className="flex items-center gap-x-2 px-3">
             <img src={isDevMode ? "/dev-history.svg" : "/history.svg"} width="44" height="44" />
             <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>History and Stats</h2>
           </div>
@@ -399,26 +399,27 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="flex items-center gap-x-2">
+          <img src={clsx(isDevMode ? "/dev-uv-widget.svg" : "/uv-widget.svg")} className="w-full px-6 mt-5" />
+          <div className="flex items-center gap-x-2 px-3">
             <img src={isDevMode ? "/dev-summary.svg" : "/summary.svg"} width="20" height="20" className="m-3" />
             <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>Summary</h2>
           </div>
-          <div className="bg-[#C2CAF2] grid grid-cols-3 gap-5 rounded-2xl p-3 text-white">
+          <div className="bg-[#C2CAF2] grid grid-cols-3 gap-5 rounded-2xl mx-6 p-3 text-white">
             {
               summaryStats.map((stat) => (
                 <div className="bg-[#8590C8] rounded-xl p-2" key={stat.name}>
                   <p className="font-bold">{stat.value}</p>
-                  <p className="pr-8">{stat.name}</p>
+                  <p className="pr-4">{stat.name}</p>
                 </div>
               ))
             }
           </div>
-          <div className="flex items-center gap-x-2 mt-5">
+          <div className="flex items-center gap-x-2 mt-5 px-3">
             <img src={isDevMode ? "/dev-trips.svg" : "/trips.svg"} width="28" height="28" className="m-2" />
             <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>Trips</h2>
           </div>
-          <ul>
-            {prevTrips && prevTrips.slice(-3).toReversed().map((prevTrip, i) => (
+          <ul className="px-3">
+            {prevTrips && prevTrips.slice(-2).toReversed().map((prevTrip, i) => (
               <li key={i} className={clsx("px-3", i !== 0 ? "border-t border-gray-500 py-3" : "pb-3 pt-1")}>
                 <h3>{prevTrip.destination.name}</h3>
                 <p className="opacity-50">{prevTrip.destination.formatted_address?.split(", ").slice(0, -1).join(", ")}</p>
