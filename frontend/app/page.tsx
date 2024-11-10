@@ -275,13 +275,13 @@ export default function Home() {
           <Switch id="airplane-mode" checked={isDevMode} onCheckedChange={() => setIsDevMode((prev) => !prev)} />
         </div>
       </main>
-      <button onClick={() => setOptionsOpen(true)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "bg-devmodeBg" : "bg-normalBg", optionsOpen ? "hidden" : "")}><img src="/history.svg" width="40" height="40" /></button>
+      <button onClick={() => setOptionsOpen(true)} className={clsx("absolute top-5 right-5 p-4 rounded-xl", isDevMode ? "bg-devmodeBg" : "bg-normalBg", optionsOpen ? "hidden" : "")}><img src={isDevMode ? "/blue-bars.svg" : "/bars.svg"} width="24" height="24" /></button>
       {optionsOpen &&
         <aside className={clsx("flex flex-col px-5 py-7", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "h-screen absolute top-0 right-0 w-128")}>
           <button onClick={() => setOptionsOpen(false)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "" : "")}><img src="/X.svg" width="40" height="40" /></button>
           <div className="flex items-center gap-x-2">
-            <img src="/history.svg" width="44" height="44" />
-            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>History and Stats</h2>
+            <img src={isDevMode ? "/dev-history.svg" : "/history.svg"} width="44" height="44" />
+            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>History and Stats</h2>
           </div>
           <div className="flex justify-between">
             {charts.map((chart) => (
@@ -333,8 +333,8 @@ export default function Home() {
             ))}
           </div>
           <div className="flex items-center gap-x-2">
-            <img src="/summary.svg" width="20" height="20" className="m-3" />
-            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Summary</h2>
+            <img src={isDevMode ? "/dev-summary.svg" : "/summary.svg"} width="20" height="20" className="m-3" />
+            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>Summary</h2>
           </div>
           <div className="bg-[#C2CAF2] grid grid-cols-3 gap-5 rounded-2xl p-3 text-white">
             {
@@ -347,8 +347,8 @@ export default function Home() {
             }
           </div>
           <div className="flex items-center gap-x-2 mt-5">
-            <img src="/trips.svg" width="28" height="28" className="m-2" />
-            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Trips</h2>
+            <img src={isDevMode ? "/dev-trips.svg" : "/trips.svg"} width="28" height="28" className="m-2" />
+            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>Trips</h2>
           </div>
           <ul>
             {prevTrips && prevTrips.slice(-3).toReversed().map((prevTrip, i) => (
