@@ -14,3 +14,12 @@ npm run dev
 ```
 
 Then, open `http://localhost:3000`.
+
+Running our Hello World side quest:
+
+```
+cd hello-world
+pipenv install
+pipenv shell
+python hello_world_dvd.py
+```
