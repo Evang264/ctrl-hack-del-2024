@@ -1,6 +1,6 @@
 "use client";
 
-import { AdvancedMarker, APIProvider, Map, MapCameraChangedEvent, useAdvancedMarkerRef } from "@vis.gl/react-google-maps";
+import { AdvancedMarker, APIProvider, Map, MapCameraChangedEvent, useAdvancedMarkerRef, useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import MapHandler from "@/components/map-handler";
@@ -174,14 +174,18 @@ export default function Home() {
   const [prevTrips, setPrevTrips] = useState<PrevTrip[] | null>(null);
   const [optionsOpen, setOptionsOpen] = useState<boolean>(false);
 
-  const flightPlanCoordinates = [
-    { lat: 37.772, lng: -122.214 },
-    { lat: 21.291, lng: -157.821 },
-    { lat: -18.142, lng: 178.431 },
-    { lat: -27.467, lng: 153.027 },
-  ];
+  const [steps, setSteps] = useState<google.maps.DirectionsStep[] | null>(null);
 
-  console.log(prevTrips);
+  // const flightPlanCoordinates = [
+  //   { lat: 37.772, lng: -122.214 },
+  //   { lat: 21.291, lng: -157.821 },
+  //   { lat: -18.142, lng: 178.431 },
+  //   { lat: -27.467, lng: 153.027 },
+  // ];
+
+  // const flightPlanCoordinates = steps?.flatMap((step) => step.path);
+
+  // console.log("steps", steps);
 
   useEffect(() => {
     if (prevTrips == null) {
@@ -197,10 +201,16 @@ export default function Home() {
       localStorage.setItem("shadefindrHistory", JSON.stringify(prevTrips));
     }
 
-    console.log("history", localStorage.getItem("shadefindrHistory"));
-  }, [prevTrips])
+    // console.log("history", localStorage.getItem("shadefindrHistory"));
+  }, [prevTrips]);
 
-  const onStart = () => {
+  useEffect(() => {
+    if ((!startMarker?.position || !destinationMarker?.position) && steps) {
+      setSteps(null);
+    }
+  }, [start, destination]);
+
+  const onStart = async () => {
     if (!start || !destination) return;
 
     setPrevTrips([...prevTrips!, {
@@ -209,6 +219,19 @@ export default function Home() {
     }]);
 
     // TODO: add API call
+
+    if (!isDevMode) {
+      if (!start.geometry?.location || !destination.geometry?.location) return;
+      const service = new google.maps.DirectionsService();
+      const response = await service.route({
+        origin: start.geometry.location,
+        destination: destination.geometry.location,
+        travelMode: "WALKING" as google.maps.TravelMode,
+        provideRouteAlternatives: false
+      });
+
+      setSteps(response.routes[0].legs[0].steps);
+    }
   };
 
   // const totalVisitors = React.useMemo(() => {
@@ -219,7 +242,7 @@ export default function Home() {
     <>
       <main className={clsx(optionsOpen ? "brightness-50" : "")}>
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <Navbar onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
+          <Navbar steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
           <div className="h-screen w-screen">
             <Map
               mapId={'bf51a910020fa25a'}
@@ -234,11 +257,13 @@ export default function Home() {
             >
               <AdvancedMarker ref={startMarkerRef} position={null} />
               <AdvancedMarker ref={destinationMarkerRef} position={null} />
-              <Polyline
-                strokeWeight={10}
-                strokeColor={'#ff22cc88'}
-                path={flightPlanCoordinates}
-              />
+              {steps && 
+                <Polyline
+                  strokeWeight={10}
+                  strokeColor={'#ff22cc88'}
+                  path={steps?.flatMap((step) => step.path)}
+                />
+              }
             </Map>
             <MapHandler start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />
           </div>
@@ -249,88 +274,90 @@ export default function Home() {
         </div>
       </main>
       <button onClick={() => setOptionsOpen(true)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "bg-devmodeBg" : "bg-normalBg", optionsOpen ? "hidden" : "")}><img src="/history.svg" width="40" height="40" /></button>
-      <aside className={clsx(optionsOpen ? "flex flex-col px-5 py-7" : "hidden", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "h-screen absolute top-0 right-0 w-128")}>
-        <button onClick={() => setOptionsOpen(false)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "" : "")}><img src="/X.svg" width="40" height="40" /></button>
-        <div className="flex items-center gap-x-2">
-          <img src="/history.svg" width="44" height="44" />
-          <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>History and Stats</h2>
-        </div>
-        <div className="flex justify-between">
-          {charts.map((chart) => (
-            <div className="flex flex-col items-center" key={chart.title}>
-              <ChartContainer
-                config={chart.config}
-                className="mx-auto aspect-square h-40"
-              >
-                <PieChart>
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Pie
-                    data={chart.data}
-                    dataKey="percentage"
-                    nameKey="type"
-                    innerRadius={60}
-                    outerRadius={70}
-                    strokeWidth={5}
-                  >
-                    <Label
-                      content={({ viewBox }) => {
-                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                          return (
-                            <text
-                              x={viewBox.cx}
-                              y={viewBox.cy}
-                              textAnchor="middle"
-                              dominantBaseline="middle"
-                            >
-                              <tspan
+      {optionsOpen &&
+        <aside className={clsx("flex flex-col px-5 py-7", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "h-screen absolute top-0 right-0 w-128")}>
+          <button onClick={() => setOptionsOpen(false)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "" : "")}><img src="/X.svg" width="40" height="40" /></button>
+          <div className="flex items-center gap-x-2">
+            <img src="/history.svg" width="44" height="44" />
+            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>History and Stats</h2>
+          </div>
+          <div className="flex justify-between">
+            {charts.map((chart) => (
+              <div className="flex flex-col items-center" key={chart.title}>
+                <ChartContainer
+                  config={chart.config}
+                  className="mx-auto aspect-square h-40"
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                      data={chart.data}
+                      dataKey="percentage"
+                      nameKey="type"
+                      innerRadius={60}
+                      outerRadius={70}
+                      strokeWidth={5}
+                    >
+                      <Label
+                        content={({ viewBox }) => {
+                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                            return (
+                              <text
                                 x={viewBox.cx}
                                 y={viewBox.cy}
-                                className={clsx("text-3xl font-bold", isDevMode ? "fill-white" : "fill-foreground")}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
                               >
-                                {chart.center}
-                              </tspan>
-                            </text>
-                          )
-                        }
-                      }}
-                    />
-                  </Pie>
-                </PieChart>
-              </ChartContainer>
-              <span className="px-5 text-center leading-4">{chart.title}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-x-2">
-          <img src="/summary.svg" width="20" height="20" className="m-3" />
-          <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Summary</h2>
-        </div>
-        <div className="bg-[#C2CAF2] grid grid-cols-3 gap-5 rounded-2xl p-3 text-white">
-          {
-            summaryStats.map((stat) => (
-              <div className="bg-[#8590C8] rounded-xl p-2" key={stat.name}>
-                <p className="font-bold">{stat.value}</p>
-                <p className="pr-8">{stat.name}</p>
+                                <tspan
+                                  x={viewBox.cx}
+                                  y={viewBox.cy}
+                                  className={clsx("text-3xl font-bold", isDevMode ? "fill-white" : "fill-foreground")}
+                                >
+                                  {chart.center}
+                                </tspan>
+                              </text>
+                            )
+                          }
+                        }}
+                      />
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+                <span className="px-5 text-center leading-4">{chart.title}</span>
               </div>
-            ))
-          }
-        </div>
-        <div className="flex items-center gap-x-2 mt-5">
-          <img src="/trips.svg" width="28" height="28" className="m-2" />
-          <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Trips</h2>
-        </div>
-        <ul>
-          {prevTrips && prevTrips.map((prevTrip, i) => (
-            <li key={i} className={clsx("px-3", i !== 0 ? "border-t border-gray-500 py-3" : "pb-3 pt-1")}>
-              <h3>{prevTrip.destination.name}</h3>
-              <p className="opacity-50">{prevTrip.destination.formatted_address?.split(", ").slice(0, -1).join(", ")}</p>
-            </li>
-          ))}
-        </ul>
-      </aside>
+            ))}
+          </div>
+          <div className="flex items-center gap-x-2">
+            <img src="/summary.svg" width="20" height="20" className="m-3" />
+            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Summary</h2>
+          </div>
+          <div className="bg-[#C2CAF2] grid grid-cols-3 gap-5 rounded-2xl p-3 text-white">
+            {
+              summaryStats.map((stat) => (
+                <div className="bg-[#8590C8] rounded-xl p-2" key={stat.name}>
+                  <p className="font-bold">{stat.value}</p>
+                  <p className="pr-8">{stat.name}</p>
+                </div>
+              ))
+            }
+          </div>
+          <div className="flex items-center gap-x-2 mt-5">
+            <img src="/trips.svg" width="28" height="28" className="m-2" />
+            <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Trips</h2>
+          </div>
+          <ul>
+            {prevTrips && prevTrips.map((prevTrip, i) => (
+              <li key={i} className={clsx("px-3", i !== 0 ? "border-t border-gray-500 py-3" : "pb-3 pt-1")}>
+                <h3>{prevTrip.destination.name}</h3>
+                <p className="opacity-50">{prevTrip.destination.formatted_address?.split(", ").slice(0, -1).join(", ")}</p>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      }
     </>
   );
 }

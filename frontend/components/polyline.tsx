@@ -27,7 +27,7 @@ type PolylineCustomProps = {
   /**
    * this is an encoded string for the path, will be decoded and used as a path
    */
-  path?: google.maps.MVCArray<google.maps.LatLng> | google.maps.LatLngLiteral[] | (google.maps.LatLng | google.maps.LatLngLiteral);
+  path?: google.maps.MVCArray<google.maps.LatLng> | google.maps.LatLngLiteral[] | google.maps.LatLng[] | (google.maps.LatLng | google.maps.LatLngLiteral);
 };
 
 export type PolylineProps = google.maps.PolylineOptions &
