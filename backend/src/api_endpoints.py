@@ -6,12 +6,14 @@ import shade
 
 app = Flask(__name__)
 
+
 def _build_cors_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
+
 
 def _corsify_actual_response(response):
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -50,7 +52,9 @@ def shadiest_route():
     # )
     shade_percent = 76  # just a random number
 
-    return _corsify_actual_response(jsonify({"route": route, "shade_percent": shade_percent}))
+    return _corsify_actual_response(
+        jsonify({"route": route, "shade_percent": shade_percent})
+    )
 
 
 if __name__ == "__main__":

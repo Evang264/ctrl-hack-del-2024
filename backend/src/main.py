@@ -4,15 +4,11 @@ import folium
 from shapely.geometry import LineString
 from geopandas.tools import sjoin
 import geopandas as gpd
-import csv
 from pyproj import Transformer
 import pandas as pd
 
 
 def shadiest_path(lat1, lon1, lat2, lon2) -> "list[tuple[float, float]]":
-    point1 = (lat1, lon1)
-    point2 = (lat2, lon2)
-
     # Compute the bounding box with buffer
     buffer = 0.01  # degrees
     north = max(lat1, lat2) + buffer
