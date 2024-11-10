@@ -11,6 +11,7 @@ pvlib = "*"
 scikit-learn = "*"
 geopandas = "*"
 networkx = "*"
+flask = "*"
 
 [dev-packages]
 
