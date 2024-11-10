@@ -184,6 +184,7 @@ export default function Home() {
   const [pathPoints, setPathPoints] = useState<[number, number][] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [shadePercent, setShadePercent] = useState<number | null>(null);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   // const flightPlanCoordinates = [
   //   { lat: 37.772, lng: -122.214 },
@@ -275,7 +276,7 @@ export default function Home() {
     <>
       <main className={clsx(optionsOpen ? "brightness-50" : "")}>
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <Navbar shadePercent={shadePercent} isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
+          <Navbar isNavOpen={isNavOpen} setIsNavOpen={setIsNavOpen} shadePercent={shadePercent} isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
           <div className="h-screen w-screen">
             <Map
               mapId={'bf51a910020fa25a'}
@@ -292,11 +293,11 @@ export default function Home() {
                 <div className="rounded-full bg-white w-5 h-5 border-black border-4" />
               </AdvancedMarker>
               <AdvancedMarker ref={destinationMarkerRef} position={null} />
-              {/* {trees.trees.map((tree, i) => (
+              {trees.trees.map((tree, i) => (
                 <AdvancedMarker position={tree} key={i}>
                   <div className="bg-green-500 w-5 h-5 rounded-full border" />
                 </AdvancedMarker>
-              ))} */}
+              ))}
               {steps ? 
                 <Polyline
                   strokeWeight={8}
@@ -311,7 +312,7 @@ export default function Home() {
                 )
               }
             </Map>
-            <MapHandler start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />
+            <MapHandler isNavOpen={isNavOpen} start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />
           </div>
         </APIProvider>
         <div className={clsx("absolute bottom-0 right-0 m-5 flex items-center space-x-2 p-2 rounded-xl", isDevMode ? "bg-devmodeLightBg text-white" : "bg-normalBg text-black")}>
