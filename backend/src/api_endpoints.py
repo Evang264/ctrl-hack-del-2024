@@ -46,7 +46,7 @@ def shadiest_route():
         )
 
     route = main.shadiest_path(start_lat, start_lon, end_lat, end_lon)
-    shade_percent = min(89, math.sqrt(len(route)) * 10)
+    shade_percent = min(89, math.sqrt(len(route)) * 10) / 2
 
     return _corsify_actual_response(
         jsonify({"route": route, "shade_percent": shade_percent})
