@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <>
       <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-        <Navbar addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} />
+        <Navbar addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
         <div className="h-screen w-screen">
           <Map
             mapId={'bf51a910020fa25a'}
