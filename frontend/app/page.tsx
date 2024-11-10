@@ -11,6 +11,7 @@ import clsx from "clsx";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Label, Pie, PieChart } from "recharts";
 import React from "react";
+import trees from "../data/trees.json";
 
 const defaultLocation = { lat: 43.472284474327545, lng: -80.54485482138256 };
 
@@ -259,6 +260,11 @@ export default function Home() {
                 <div className="rounded-full bg-white w-5 h-5 border-black border-4" />
               </AdvancedMarker>
               <AdvancedMarker ref={destinationMarkerRef} position={null} />
+              {trees.trees.map((tree, i) => (
+                <AdvancedMarker position={tree} key={i}>
+                  <div className="bg-green-500 w-5 h-5 rounded-full border" />
+                </AdvancedMarker>
+              ))}
               {steps && 
                 <Polyline
                   strokeWeight={8}
