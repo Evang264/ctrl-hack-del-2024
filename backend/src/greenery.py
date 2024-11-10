@@ -3,7 +3,7 @@ import folium
 import csv
 
 # Define your area and download the graph and greenery data
-location = "Waterloo, Ontario, Canada"
+location = "43.471278, -80.543038"
 graph = ox.graph_from_place(location, network_type="walk")
 greenery = ox.features_from_place(location, tags={"natural": "tree"})
 
@@ -26,28 +26,22 @@ folium.GeoJson(
 
 # Plot tree locations as points
 with open("../frontend/public/trees.csv", "w", newline="") as csvfile:
+    coord_writer = csv.writer(csvfile)
+    coord_writer.writerow(["Latitude", "Longitude"])
+
     for _, row in greenery_projected.to_crs(
         epsg=4326
     ).iterrows():  # Convert to WGS84 for folium
-        coord_writer = csv.writer(csvfile)
-
-        coord_writer.writerow(["Latitude", "Longitude"])
-
         if row.geometry.geom_type == "Point":
-            coord_writer.writerow([row.geometry.y, row.geometry.x])
-            folium.CircleMarker(
-                location=[row.geometry.y, row.geometry.x],
-                radius=5,
-                color="green",
-                fill=True,
-                fill_opacity=0.6,
-            ).add_to(m)
-        # elif row.geometry.geom_type == "Polygon":
-        #     print("polygon found!")
-        #     # Add larger tree clusters as polygons if they exist
-        #     folium.GeoJson(
-        #         row.geometry.__geo_interface__,
-        #         style_function=lambda x: {"color": "green", "weight": 1},
-        #     ).add_to(m)
+            lat, lon = row.geometry.y, row.geometry.x
+            if -80.531845 >= lon >= -80.558181 and 43.478606 >= lat >= 43.464190:
+                coord_writer.writerow([lat, lon])
+                folium.CircleMarker(
+                    location=[row.geometry.y, row.geometry.x],
+                    radius=5,
+                    color="green",
+                    fill=True,
+                    fill_opacity=0.6,
+                ).add_to(m)
 
     m.save("waterloo_shade_map.html")
