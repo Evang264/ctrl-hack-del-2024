@@ -160,9 +160,19 @@ export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [location, setLocation] = useState<google.maps.LatLngLiteral>(defaultLocation);
 
-  const [start, setStart] = useState<google.maps.places.PlaceResult | null>(null);
+  const [start, _setStart] = useState<google.maps.places.PlaceResult | null>(null);
 
-  const [destination, setDestination] = useState<google.maps.places.PlaceResult | null>(null);
+  const [destination, _setDestination] = useState<google.maps.places.PlaceResult | null>(null);
+
+  const setStart = (place: google.maps.places.PlaceResult | null) => {
+    onClear();
+    _setStart(place);
+  }
+
+  const setDestination = (place: google.maps.places.PlaceResult | null) => {
+    onClear();
+    _setDestination(place);
+  }
 
   const addStart = (place: google.maps.places.PlaceResult | null) => {
     setStart(place);
