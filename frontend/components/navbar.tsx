@@ -25,7 +25,7 @@ export default function Navbar({ addStart, addDestination, isDevMode, canStart, 
 
   return (
     <>
-      <div className={clsx(showNav ? "flex" : "hidden", isDevMode ? "bg-devmodeBg" : "bg-normalBg", "rounded-xl justify-between items-center flex-col pt-8 w-{1/3} h-screen fixed z-10 px-5 w-96")}>
+      <div className={clsx(showNav ? "flex" : "hidden", isDevMode ? "bg-devmodeBg" : "bg-normalBg", "justify-between items-center flex-col pt-8 w-{1/3} h-screen fixed z-10 px-5 w-96")}>
         <div>
           <div className="flex gap-x-4 items-center">
             <button onClick={() => setShowNav(false)}>{isDevMode ? <img src="/blue-bars.svg" width="24" height="24" /> : <img src="/bars.svg" width="24" height="24" />}</button>
@@ -43,7 +43,7 @@ export default function Navbar({ addStart, addDestination, isDevMode, canStart, 
             {isDevMode ? <img src="/light-switch.svg" width="20" height="21" /> : <img src="/switch.svg" width="20" height="21" />}
           </div>
 
-          <div className="flex flex-col gap-y-5 mt-5">
+          <div className="flex flex-col gap-y-5 mt-5 overflow-auto max-h-[36rem]">
             {steps && steps.map((step, i) => (
               <div key={i} className="flex gap-x-5">
                 <div className="w-5">
