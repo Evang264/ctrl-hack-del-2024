@@ -12,6 +12,7 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 import { Label, Pie, PieChart } from "recharts";
 import React from "react";
 import trees from "../data/trees.json";
+import localFont from "next/font/local";
 
 const defaultLocation = { lat: 43.472284474327545, lng: -80.54485482138256 };
 
@@ -59,6 +60,11 @@ type PrevTrip = {
 //   { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
 //   { browser: "other", visitors: 190, fill: "var(--color-other)" },
 // ];
+
+const departureMono = localFont({
+  src: '../app/fonts/DepartureMono-1.422/DepartureMono-Regular.woff2',
+  display: 'swap',
+});
 
 const charts = [
   {
@@ -210,7 +216,7 @@ export default function Home() {
   useEffect(() => {
     if (prevTrips == null) {
       const storedData = localStorage.getItem("shadefindrHistory");
-      
+
       if (storedData === null) {
         setPrevTrips([]);
       } else {
@@ -335,6 +341,7 @@ export default function Home() {
           <Switch id="airplane-mode" checked={isDevMode} onCheckedChange={() => setIsDevMode((prev) => !prev)} />
         </div>
       </main>
+      {!isNavOpen && <h1 className={clsx(departureMono.className, "text-4xl absolute bottom-5 left-5", isDevMode ? "text-[#248AFF]" : "text-[#DB7500]")}>shadefindr</h1>}
       <button onClick={() => setOptionsOpen(true)} className={clsx("absolute top-5 right-5 p-4 rounded-xl", isDevMode ? "bg-devmodeBg" : "bg-normalBg", optionsOpen ? "hidden" : "")}><img src={isDevMode ? "/blue-bars.svg" : "/bars.svg"} width="24" height="24" /></button>
       {optionsOpen &&
         <aside className={clsx("flex flex-col px-5 py-7", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "h-screen absolute top-0 right-0 w-128")}>
