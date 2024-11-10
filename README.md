@@ -10,7 +10,7 @@ python src/api_endpoints.py
 
 cd ../frontend/
 npm install -f
-npm run build
+npm run dev
 ```
 
 Then, open `http://localhost:3000`.
