@@ -5,6 +5,8 @@ import { useState } from "react";
 import Navbar from "@/components/navbar";
 import MapHandler from "@/components/map-handler";
 import { Polyline } from "@/components/polyline";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const defaultLocation = { lat: 43.77211663142969, lng: -79.50660297466334 };
 
@@ -27,6 +29,8 @@ export default function Home() {
   const [startMarkerRef, startMarker] = useAdvancedMarkerRef();
   const [destinationMarkerRef, destinationMarker] = useAdvancedMarkerRef();
 
+  const [isDevMode, setIsDevMode] = useState<boolean>(false);
+
   const flightPlanCoordinates = [
     { lat: 37.772, lng: -122.214 },
     { lat: 21.291, lng: -157.821 },
@@ -35,25 +39,35 @@ export default function Home() {
   ];
 
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-      <Navbar addStart={addStart} addDestination={addDestination} />
-      <div className="h-screen w-screen">
-        <Map
-          mapId={'bf51a910020fa25a'}
-          defaultZoom={14}
-          defaultCenter={ defaultLocation }
-          onCameraChanged={ (ev: MapCameraChangedEvent) => setLocation(ev.detail.center)}
-        >
-          <AdvancedMarker ref={startMarkerRef} position={null} />
-          <AdvancedMarker ref={destinationMarkerRef} position={null} />
-          <Polyline
-            strokeWeight={10}
-            strokeColor={'#ff22cc88'}
-            path={flightPlanCoordinates}
-          />
-        </Map>
-        <MapHandler start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />
+    <>
+      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+        <Navbar addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} />
+        <div className="h-screen w-screen">
+          <Map
+            mapId={'bf51a910020fa25a'}
+            defaultZoom={14}
+            defaultCenter={ defaultLocation }
+            onCameraChanged={ (ev: MapCameraChangedEvent) => setLocation(ev.detail.center)}
+            colorScheme={isDevMode ? "DARK" : "LIGHT"}
+            zoomControl={false}
+            streetViewControl={false}
+            fullscreenControl={false}
+          >
+            <AdvancedMarker ref={startMarkerRef} position={null} />
+            <AdvancedMarker ref={destinationMarkerRef} position={null} />
+            <Polyline
+              strokeWeight={10}
+              strokeColor={'#ff22cc88'}
+              path={flightPlanCoordinates}
+            />
+          </Map>
+          <MapHandler start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />
+        </div>
+      </APIProvider>
+      <div className="absolute bottom-0 right-0 m-5 flex items-center space-x-2 bg-white p-2 rounded-xl">
+        <Label htmlFor="airplane-mode">Dev Mode</Label>
+        <Switch id="airplane-mode" checked={isDevMode} onCheckedChange={() => setIsDevMode((prev) => !prev)} />
       </div>
-    </APIProvider>
+    </>
   );
 }

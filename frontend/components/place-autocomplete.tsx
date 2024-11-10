@@ -1,14 +1,16 @@
 "use client";
 
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
+import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 
 type PlaceAutocompleteProps = {
   onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void;
   placeholder: string;
+  isDevMode: boolean;
 }
 
-export default function PlaceAutocomplete({ onPlaceSelect, placeholder }: PlaceAutocompleteProps) {
+export default function PlaceAutocomplete({ onPlaceSelect, placeholder, isDevMode }: PlaceAutocompleteProps) {
   const [placeAutocomplete, setPlaceAutocomplete] =
     useState<google.maps.places.Autocomplete | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,8 +44,8 @@ export default function PlaceAutocomplete({ onPlaceSelect, placeholder }: PlaceA
 
   return (
     <div className="autocomplete-control">
-      <div className="autocomplete-container">
-        <input ref={inputRef} type="text" className="border border-black rounded-xl h-12 w-full px-2" placeholder={placeholder} />
+      <div className={clsx("autocomplete-container", isDevMode ? "bg-devmodeBg" : "bg-normalBg")}>
+        <input ref={inputRef} type="text" className={clsx("border rounded-xl h-12 w-full px-2 bg-transparent", isDevMode ? "border-white text-white" : "border-black text-black")} placeholder={placeholder} />
       </div>
     </div>
   );
