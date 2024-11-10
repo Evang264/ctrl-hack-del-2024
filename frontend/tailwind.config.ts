@@ -42,6 +42,7 @@ export default {
   			},
         devmodeBg: '#00050A',
         normalBg: '#FFFAF5',
+        devmodeLightBg: '#424242',
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

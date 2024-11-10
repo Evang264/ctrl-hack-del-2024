@@ -7,6 +7,7 @@ import MapHandler from "@/components/map-handler";
 import { Polyline } from "@/components/polyline";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import clsx from "clsx";
 
 const defaultLocation = { lat: 43.77211663142969, lng: -79.50660297466334 };
 
@@ -64,7 +65,7 @@ export default function Home() {
           <MapHandler start={start} destination={destination} startMarker={startMarker} destinationMarker={destinationMarker} />
         </div>
       </APIProvider>
-      <div className="absolute bottom-0 right-0 m-5 flex items-center space-x-2 bg-white p-2 rounded-xl">
+      <div className={clsx("absolute bottom-0 right-0 m-5 flex items-center space-x-2 p-2 rounded-xl", isDevMode ? "bg-devmodeLightBg text-white" : "bg-normalBg text-black")}>
         <Label htmlFor="airplane-mode">Dev Mode</Label>
         <Switch id="airplane-mode" checked={isDevMode} onCheckedChange={() => setIsDevMode((prev) => !prev)} />
       </div>
