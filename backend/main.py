@@ -6,10 +6,9 @@ from geopandas.tools import sjoin
 import geopandas as gpd
 import csv
 from pyproj import Transformer
+import pandas as pd
 
 # Example:
-# 43.466464, -80.541752
-# 43.474832, -80.543750
 
 # Input the two coordinates
 # lat1 = float(input("Enter latitude of point 1: "))
@@ -17,8 +16,11 @@ from pyproj import Transformer
 # lat2 = float(input("Enter latitude of point 2: "))
 # lon2 = float(input("Enter longitude of point 2: "))
 
-lat1, lon1 = 43.474322, -80.545152
-lat2, lon2 = 43.471025, -80.545025
+# lat1, lon1 = 43.474322, -80.545152
+# lat2, lon2 = 43.471025, -80.545025
+
+lat1, lon1 = 43.466464, -80.541752
+lat2, lon2 = 43.474832, -80.543750
 
 point1 = (lat1, lon1)
 point2 = (lat2, lon2)
@@ -47,12 +49,20 @@ G_proj = ox.project_graph(G)
 edges_proj = ox.graph_to_gdfs(G_proj, nodes=False, edges=True)
 edges_proj = edges_proj.reset_index()
 
-# Download the trees in the area
-tags = {"natural": "tree"}
-trees = ox.geometries_from_bbox(north, south, east, west, tags)
+# Download the trees and buildings in the area
+tags_trees = {"natural": "tree"}
+trees = ox.geometries_from_bbox(north, south, east, west, tags_trees)
 
-# Project the trees to the same CRS
-trees_proj = trees.to_crs(edges_proj.crs)
+tags_buildings = {"building": True}
+buildings = ox.geometries_from_bbox(north, south, east, west, tags_buildings)
+
+# Combine trees and buildings into one GeoDataFrame
+shading_elements = gpd.GeoDataFrame(pd.concat([trees, buildings], ignore_index=True))
+shading_elements = shading_elements.set_geometry("geometry")
+shading_elements.crs = trees.crs  # Ensure CRS is set
+
+# Project the shading elements to the same CRS as edges_proj
+shading_elements_proj = shading_elements.to_crs(edges_proj.crs)
 
 # Buffer the edges
 buffer_dist = 20  # meters
@@ -65,7 +75,9 @@ edges_buffers.crs = edges_proj.crs
 edges_buffers["edge_id"] = edges_buffers.index
 
 # Perform spatial join
-edges_trees = sjoin(edges_buffers, trees_proj, how="left", predicate="contains")
+edges_trees = sjoin(
+    edges_buffers, shading_elements_proj, how="left", predicate="contains"
+)
 
 # Count the number of trees per edge
 tree_counts = edges_trees.groupby("edge_id").size().reset_index(name="tree_count")
