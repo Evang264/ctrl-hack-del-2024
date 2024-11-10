@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import MapHandler from "@/components/map-handler";
 import { Polyline } from "@/components/polyline";
+import { Label as UILabel } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import clsx from "clsx";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -64,7 +65,7 @@ const charts = [
       { type: "sun", percentage: 80, fill: "#C2CAF2" },
       { type: "sunAvoided", percentage: 20, fill: "#8590C8" },
     ],
-    center: "80%",
+    center: "80%+",
     title: "Sun Avoidance",
     config: {
       percentage: {
@@ -78,14 +79,14 @@ const charts = [
         label: "Sun Avoided",
         color: "hsl(var(--chart-2))",
       },
-    }
+    } as ChartConfig
   },
   {
     data: [
       { type: "increase", percentage: 12, fill: "#C2CAF2" },
       { type: "remaining", percentage: 82, fill: "#8590C8" },
     ],
-    center: "12%",
+    center: "12%+",
     title: "Step Increase",
     config: {
       percentage: {
@@ -99,14 +100,14 @@ const charts = [
         label: "Increase",
         color: "hsl(var(--chart-2))",
       },
-    }
+    } as ChartConfig
   },
   {
     data: [
       { type: "outdoors", percentage: 34, fill: "#C2CAF2" },
       { type: "indoors", percentage: 66, fill: "#8590C8" },
     ],
-    center: "34%",
+    center: "34%+",
     title: "Time Spent Outdoors",
     config: {
       percentage: {
@@ -120,7 +121,7 @@ const charts = [
         label: "Indoors",
         color: "hsl(var(--chart-2))",
       },
-    }
+    } as ChartConfig
   },
   // {
   //   data: chartData,
@@ -132,6 +133,21 @@ const charts = [
   //   center: "34%",
   //   title: "Time Spent Outdoors"
   // }
+];
+
+const summaryStats = [
+  {
+    name: "Total Hours Walked",
+    value: "4 hrs"
+  },
+  {
+    name: "Total Calories",
+    value: "1201"
+  },
+  {
+    name: "Total Distance",
+    value: "20 km"
+  },
 ]
 
 export default function Home() {
@@ -164,6 +180,8 @@ export default function Home() {
     { lat: -18.142, lng: 178.431 },
     { lat: -27.467, lng: 153.027 },
   ];
+
+  console.log(prevTrips);
 
   useEffect(() => {
     if (prevTrips == null) {
@@ -226,7 +244,7 @@ export default function Home() {
           </div>
         </APIProvider>
         <div className={clsx("absolute bottom-0 right-0 m-5 flex items-center space-x-2 p-2 rounded-xl", isDevMode ? "bg-devmodeLightBg text-white" : "bg-normalBg text-black")}>
-          <Label htmlFor="airplane-mode">Dev Mode</Label>
+          <UILabel htmlFor="airplane-mode">Dev Mode</UILabel>
           <Switch id="airplane-mode" checked={isDevMode} onCheckedChange={() => setIsDevMode((prev) => !prev)} />
         </div>
       </main>
@@ -234,16 +252,15 @@ export default function Home() {
       <aside className={clsx(optionsOpen ? "flex flex-col px-5 py-7" : "hidden", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "h-screen absolute top-0 right-0 w-128")}>
         <button onClick={() => setOptionsOpen(false)} className={clsx("absolute top-5 right-5 p-2 rounded-xl", isDevMode ? "" : "")}><img src="/X.svg" width="40" height="40" /></button>
         <div className="flex items-center gap-x-2">
-          <img src="/history.svg" width="40" height="40" />
+          <img src="/history.svg" width="44" height="44" />
           <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>History and Stats</h2>
         </div>
         <div className="flex justify-between">
           {charts.map((chart) => (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center" key={chart.title}>
               <ChartContainer
                 config={chart.config}
                 className="mx-auto aspect-square h-40"
-                key={chart.title}
               >
                 <PieChart>
                   <ChartTooltip
@@ -291,10 +308,28 @@ export default function Home() {
           <img src="/summary.svg" width="20" height="20" className="m-3" />
           <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Summary</h2>
         </div>
-        <div className="flex items-center gap-x-2">
-          <img src="/summary.svg" width="20" height="20" className="m-3" />
+        <div className="bg-[#C2CAF2] grid grid-cols-3 gap-5 rounded-2xl p-3 text-white">
+          {
+            summaryStats.map((stat) => (
+              <div className="bg-[#8590C8] rounded-xl p-2" key={stat.name}>
+                <p className="font-bold">{stat.value}</p>
+                <p className="pr-8">{stat.name}</p>
+              </div>
+            ))
+          }
+        </div>
+        <div className="flex items-center gap-x-2 mt-5">
+          <img src="/trips.svg" width="28" height="28" className="m-2" />
           <h2 className={clsx("text-xl", isDevMode ? "text-devmodeBlue" : "text-black")}>Trips</h2>
         </div>
+        <ul>
+          {prevTrips && prevTrips.map((prevTrip, i) => (
+            <li key={i} className={clsx("px-3", i !== 0 ? "border-t border-gray-500 py-3" : "pb-3 pt-1")}>
+              <h3>{prevTrip.destination.name}</h3>
+              <p className="opacity-50">{prevTrip.destination.formatted_address?.split(", ").slice(0, -1).join(", ")}</p>
+            </li>
+          ))}
+        </ul>
       </aside>
     </>
   );
