@@ -8,20 +8,23 @@ type MapHandlerProps = {
   destination: google.maps.places.PlaceResult | null;
   startMarker: google.maps.marker.AdvancedMarkerElement | null;
   destinationMarker: google.maps.marker.AdvancedMarkerElement | null;
+  isNavOpen: boolean;
 }
 
-export default function MapHandler({ start, destination, startMarker, destinationMarker }: MapHandlerProps) {
+export default function MapHandler({ start, destination, startMarker, destinationMarker, isNavOpen }: MapHandlerProps) {
   const map = useMap();
 
   useEffect(() => {
     if (!map) return;
 
+    const padding = isNavOpen ? { left: 300 } : 0;
+
     if (start && start.geometry?.viewport && destination && destination.geometry?.viewport) {
-      map.fitBounds(start.geometry?.viewport.union(destination.geometry?.viewport));
+      map.fitBounds(start.geometry?.viewport.union(destination.geometry?.viewport), padding);
     } else if (start && start.geometry?.viewport) {
-      map.fitBounds(start.geometry?.viewport)
+      map.fitBounds(start.geometry?.viewport, padding)
     } else if (destination && destination.geometry?.viewport) {
-      map.fitBounds(destination.geometry?.viewport)
+      map.fitBounds(destination.geometry?.viewport, padding)
     }
 
     if (start && startMarker) {

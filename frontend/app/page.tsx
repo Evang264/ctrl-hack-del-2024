@@ -183,6 +183,7 @@ export default function Home() {
   const [steps, setSteps] = useState<google.maps.DirectionsStep[] | null>(null);
   const [pathPoints, setPathPoints] = useState<[number, number][] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [shadePercent, setShadePercent] = useState<number | null>(null);
 
   // const flightPlanCoordinates = [
   //   { lat: 37.772, lng: -122.214 },
@@ -219,6 +220,7 @@ export default function Home() {
 
     if ((!startMarker?.position || !destinationMarker?.position) && pathPoints) {
       setPathPoints(null);
+      setShadePercent(null);
     }
   }, [start, destination]);
 
@@ -233,6 +235,8 @@ export default function Home() {
     if (!start.geometry?.location || !destination.geometry?.location) return;
 
     if (!isDevMode) {
+      setPathPoints(null);
+      setShadePercent(null);
       const service = new google.maps.DirectionsService();
       const response = await service.route({
         origin: start.geometry.location,
@@ -242,9 +246,11 @@ export default function Home() {
       });
 
       setSteps(response.routes[0].legs[0].steps);
-      setPathPoints(null);
+      
     } else {
       setIsLoading(true);
+      setSteps(null);
+
       const response = await fetch(`http://127.0.0.1:5000/api/shadiest_route?${new URLSearchParams({
         start_lat: start.geometry.location.lat().toString(),
         start_lon: start.geometry.location.lng().toString(),
@@ -257,7 +263,7 @@ export default function Home() {
 
       setIsLoading(false);
       setPathPoints(data.route);
-      setSteps(null);
+      setShadePercent(data.shade_percent);
     }
   };
 
@@ -269,7 +275,7 @@ export default function Home() {
     <>
       <main className={clsx(optionsOpen ? "brightness-50" : "")}>
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <Navbar isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
+          <Navbar shadePercent={shadePercent} isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
           <div className="h-screen w-screen">
             <Map
               mapId={'bf51a910020fa25a'}
@@ -395,6 +401,7 @@ export default function Home() {
                 <p className="opacity-50">{prevTrip.destination.formatted_address?.split(", ").slice(0, -1).join(", ")}</p>
               </li>
             ))}
+            {prevTrips !== null && prevTrips.length === 0 && <li className="ml-3">No previous trips!</li>}
           </ul>
         </aside>
       }

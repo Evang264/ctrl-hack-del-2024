@@ -19,17 +19,18 @@ type NavbarProps = {
   onStart: () => void;
   steps: google.maps.DirectionsStep[] | null;
   isLoading: boolean;
+  shadePercent: number | null;
+  isNavOpen: boolean;
+  setIsNavOpen: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function Navbar({ isLoading, addStart, addDestination, isDevMode, canStart, onStart, steps }: NavbarProps) {
-  const [showNav, setShowNav] = useState(true);
-
+export default function Navbar({ shadePercent, isLoading, addStart, addDestination, isDevMode, canStart, onStart, steps, isNavOpen, setIsNavOpen }: NavbarProps) {
   return (
     <>
-      <div className={clsx(showNav ? "flex" : "hidden", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "justify-between items-center flex-col pt-8 w-{1/3} h-screen fixed z-10 px-5 w-96")}>
+      <div className={clsx(isNavOpen ? "flex" : "hidden", isDevMode ? "bg-devmodeBg text-white" : "bg-normalBg", "justify-between items-center flex-col pt-8 w-{1/3} h-screen fixed z-10 px-5 w-96")}>
         <div>
           <div className="flex gap-x-4 items-center">
-            <button onClick={() => setShowNav(false)} className="rotate-180">{isDevMode ? <img src="/dev-navbar-toggle.svg" width="33" height="24" /> : <img src="/navbar-toggle.svg" width="33" height="24" />}</button>
+            <button onClick={() => setIsNavOpen(false)} className="rotate-180">{isDevMode ? <img src="/dev-navbar-toggle.svg" width="33" height="24" /> : <img src="/navbar-toggle.svg" width="33" height="24" />}</button>
             <h1 className={clsx(departureMono.className, "text-4xl mb-1", isDevMode ? "text-[#248AFF]" : "text-[#DB7500]")}>shadefindr</h1>
           </div>
           
@@ -55,12 +56,13 @@ export default function Navbar({ isLoading, addStart, addDestination, isDevMode,
                 <div className="flex-1" dangerouslySetInnerHTML={{__html: step.instructions}} />
               </div>
             ))}
-            {isLoading && "Loading..."}
+            {isLoading && "Finding shadiest path..."}
+            {shadePercent && `Found ${shadePercent}% shady path!`}
           </div>
         </div>
         {canStart && <button onClick={onStart} className={clsx("mb-5 w-4/5 py-2 rounded-2xl border transition", isDevMode ? "text-white bg-devmodeLightBg hover:brightness-125 border-white" : "text-black bg-normalBg border-black hover:brightness-95")}>Start Journey</button>}
       </div>
-      <button onClick={() => setShowNav(true)} className={clsx(showNav ? "hidden" : "", isDevMode ? "bg-devmodeBg" : "bg-normalBg", "bg-opacity-50 absolute top-5 left-2 z-10 py-5 px-4 rounded-full")}>{isDevMode ? <img src="/dev-navbar-toggle.svg" width="33" height="24" /> : <img src="/navbar-toggle.svg" width="33" height="24" />}</button>
+      <button onClick={() => setIsNavOpen(true)} className={clsx(isNavOpen ? "hidden" : "", isDevMode ? "bg-devmodeBg" : "bg-normalBg", "bg-opacity-50 absolute top-5 left-2 z-10 py-5 px-4 rounded-full")}>{isDevMode ? <img src="/dev-navbar-toggle.svg" width="33" height="24" /> : <img src="/navbar-toggle.svg" width="33" height="24" />}</button>
     </>
   )
 }
