@@ -60,7 +60,7 @@ export default function Navbar({ isShowingPath, onClear, shadePercent, isLoading
               </div>
             ))}
             {isLoading && "Finding shadiest path..."}
-            {shadePercent && `Found ${shadePercent}% shady path!`}
+            {shadePercent && <div>Found <span className={clsx("font-bold", isDevMode ? "text-devmodeBlue" : "text-normalOrange")}>{shadePercent.toFixed(2)}%</span> shady path!</div>}
           </div>
         </div>
         {canStart && !isShowingPath && <button onClick={onStart} className={clsx("mb-5 w-4/5 py-2 rounded-2xl border transition", isDevMode ? "text-white bg-devmodeLightBg hover:brightness-125 border-white" : "text-black bg-normalBg border-black hover:brightness-95")}>Start Journey</button>}
