@@ -33,7 +33,7 @@ export default function Navbar({ addStart, addDestination, isDevMode }: NavbarPr
             <PlaceAutocomplete onPlaceSelect={addDestination} placeholder="Choose destination" isDevMode={isDevMode} />
           </APIProvider>
         </div>
-        <img src="/switch.svg" width="20" height="21" />
+        {isDevMode ? <img src="/light-switch.svg" width="20" height="21" /> : <img src="/switch.svg" width="20" height="21" />}
       </div>
     </div>
   )
