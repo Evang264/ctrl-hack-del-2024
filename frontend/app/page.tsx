@@ -184,7 +184,7 @@ export default function Home() {
   const [pathPoints, setPathPoints] = useState<[number, number][] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [shadePercent, setShadePercent] = useState<number | null>(null);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(true);
 
   // const flightPlanCoordinates = [
   //   { lat: 37.772, lng: -122.214 },
@@ -268,6 +268,12 @@ export default function Home() {
     }
   };
 
+  const onClear = () => {
+    setPathPoints(null);
+    setSteps(null);
+    setShadePercent(null);
+  };
+
   // const totalVisitors = React.useMemo(() => {
   //   return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
   // }, [])
@@ -276,7 +282,7 @@ export default function Home() {
     <>
       <main className={clsx(optionsOpen ? "brightness-50" : "")}>
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <Navbar isNavOpen={isNavOpen} setIsNavOpen={setIsNavOpen} shadePercent={shadePercent} isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
+          <Navbar isShowingPath={steps !== null || pathPoints !== null} onClear={onClear} isNavOpen={isNavOpen} setIsNavOpen={setIsNavOpen} shadePercent={shadePercent} isLoading={isLoading} steps={steps} onStart={onStart} addStart={addStart} addDestination={addDestination} isDevMode={isDevMode} canStart={start?.geometry?.location !== undefined && destination?.geometry?.location !== undefined} />
           <div className="h-screen w-screen">
             <Map
               mapId={'bf51a910020fa25a'}
