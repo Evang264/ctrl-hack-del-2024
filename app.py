@@ -1,101 +1,135 @@
+import googlemaps
 from flask import Flask, request, jsonify
-import requests
-from config import GOOGLE_MAPS_API_KEY
-from utils.solar import calculate_sun_position
-from utils.shade import calculate_shade
-from shapely.geometry import LineString, Polygon
-import datetime
+from datetime import datetime
 import pytz
+from geopy.distance import geodesic
+import pvlib
+from pvlib import solarposition
 
+# Initialize Flask app and Google Maps client
 app = Flask(__name__)
+gmaps = googlemaps.Client(key='AIzaSyBJM5qdAffs9JJzPG_NotZ3uDXeRgWopFI')  # Replace with your actual API key
 
-@app.route('/')
-def home():
-    return "Hello, world!"
-
-@app.route('/get_shaded_route', methods=['POST'])
-def get_shaded_route():
-    data = request.json
-    origin = data.get('origin')
-    destination = data.get('destination')
-    departure_time = data.get('departure_time')
-
-    if not origin or not destination or not departure_time:
-        return jsonify({'error': 'Missing required parameters.'}), 400
+# Function to calculate the shaded percentage of a given route
+def calculate_shade(route, obstructions, sun_positions, date_time):
+    shaded_distance = 0
+    total_distance = 0
     
-    print(f"Current time: {datetime.datetime.now(pytz.UTC)}")
+    # Get sun position for the given date_time at the first point of the route
+    sun_pos = calculate_sun_position(route[0], date_time)
 
-
-    # Convert departure_time to a timezone-aware datetime object (assuming UTC)
-    departure_time = datetime.datetime.fromisoformat(departure_time).replace(tzinfo=pytz.UTC)
-
-    print(f"Origin: {origin}, Destination: {destination}, Departure Time: {departure_time}")
+    for i in range(len(route) - 1):
+        total_distance += geodesic(route[i], route[i + 1]).meters  # Total route length in meters
+        segment_shade = calculate_segment_shade(route[i], route[i + 1], obstructions, sun_pos)
+        shaded_distance += segment_shade
     
-    # Get routes from Google Directions API
-    directions_url = 'https://maps.googleapis.com/maps/api/directions/json'
-    params = {
-        'origin': origin,
-        'destination': destination,
-        'departure_time': int(departure_time.timestamp()),
-        'key': GOOGLE_MAPS_API_KEY
-    }
-    response = requests.get(directions_url, params=params)
+    shade_percentage = (shaded_distance / total_distance) * 100 if total_distance else 0
+    return shade_percentage
+
+# Function to calculate the sun's position for a given time and location
+def calculate_sun_position(location, date_time):
+    lat, lon = location
+    tz = pytz.timezone('America/Toronto')  # Timezone of Waterloo, ON
+    date_time = tz.localize(date_time)  # Localize the datetime object to Toronto time zone
     
-    print(f"Request URL: {response.url}")
-    print(f"Request Params: {params}")
-    print(f"Response Status Code: {response.status_code}")
-    print(f"Response Data: {response.json()}")
+    # Use pvlib to calculate the sun's position at the given time
+    solar_position = solarposition.get_solarposition(date_time, lat, lon)
+    
+    # Extract solar position info: azimuth (angle from north) and altitude (elevation angle)
+    azimuth = solar_position['azimuth'].iloc[0]
+    altitude = solar_position['elevation'].iloc[0]
+    
+    return {'azimuth': azimuth, 'altitude': altitude}
 
-    routes = response.json().get('routes', [])
+# Function to calculate shade for a route segment
+def calculate_segment_shade(start_point, end_point, obstructions, sun_pos):
+    shade_coverage = 0
+    
+    for obstruction in obstructions:
+        # Check if obstruction is on the path
+        if is_obstruction_on_path(start_point, end_point, obstruction):
+            # Calculate the angle between the sun and the obstruction
+            angle = calculate_obstruction_angle(start_point, obstruction['location'], sun_pos)
+            # If the obstruction is blocking the sun (i.e., sun's altitude is lower than the obstruction angle)
+            if angle < 0:  # Angle in this case represents if the obstruction blocks sunlight
+                shade_coverage += 10  # This is a simplified approach
+            
+    return shade_coverage
 
-    if not routes:
-        return jsonify({'error': 'No routes found.'}), 404
+# Function to calculate the angle of obstruction relative to the sun's position
+def calculate_obstruction_angle(start_point, obstruction_point, sun_pos):
+    # Calculate the direction from the start_point to the obstruction_point
+    start_lat, start_lon = start_point
+    obstruction_lat, obstruction_lon = obstruction_point
+    
+    # Use geodesic to calculate distance and azimuth from start_point to obstruction
+    distance = geodesic(start_point, obstruction_point).meters
+    azimuth = geodesic(start_point, obstruction_point).initial
 
-    obstructions = data.get('obstructions', [])
+    # Use sun's azimuth and altitude to calculate the angle
+    sun_azimuth = sun_pos['azimuth']
+    sun_altitude = sun_pos['altitude']
 
-    # Calculate sun position at origin, midpoint, and destination
-    origin_lat, origin_lng = map(float, origin.split(','))
-    dest_lat, dest_lng = map(float, destination.split(','))
-    midpoint_lat = (origin_lat + dest_lat) / 2
-    midpoint_lng = (origin_lng + dest_lng) / 2
+    # Simplified logic to compare angles - if the obstruction is in the way of the sun
+    if abs(sun_azimuth - azimuth) < 45 and sun_altitude > 20:  # Check if obstruction is within a blocking range
+        return -1  # The negative angle signifies that the obstruction is blocking sunlight
+    return 1  # Otherwise, return a positive value, indicating no blockage
 
-    sun_positions = [
-        calculate_sun_position(origin_lat, origin_lng, departure_time),
-        calculate_sun_position(midpoint_lat, midpoint_lng, departure_time),
-        calculate_sun_position(dest_lat, dest_lng, departure_time)
-    ]
+# Function to check if an obstruction lies on the path between two points
+def is_obstruction_on_path(start_point, end_point, obstruction):
+    # Simplified logic for checking if an obstruction is on the route path
+    return geodesic(start_point, obstruction['location']).meters < 100 and geodesic(obstruction['location'], end_point).meters < 100
 
-    avg_sun_altitude = sum(pos[0] for pos in sun_positions) / len(sun_positions)
-    avg_sun_azimuth = sum(pos[1] for pos in sun_positions) / len(sun_positions)
+# Fetch the route using Google Maps Directions API
+def get_route(start_location, end_location):
+    # Request directions from start_location to end_location
+    directions = gmaps.directions(start_location, end_location, mode="walking")
+    
+    # Extract the polyline from the directions response
+    polyline = directions[0]['legs'][0]['steps']
+    
+    # Convert the polyline into a list of (latitude, longitude) coordinates
+    route = []
+    for step in polyline:
+        route.append((step['end_location']['lat'], step['end_location']['lng']))
+        
+    return route
 
-    shaded_area = calculate_shade(obstructions, avg_sun_azimuth, avg_sun_altitude)
+# Fetch nearby obstructions using Google Places API (e.g., for buildings or trees)
+def get_nearby_obstructions(route):
+    obstructions = []
+    for location in route:
+        places = gmaps.places_nearby(location, radius=100, type="store")  # Type can be 'building', 'restaurant', etc.
+        
+        for place in places['results']:
+            obstructions.append({'location': (place['geometry']['location']['lat'], place['geometry']['location']['lng']),
+                                 'type': place['types']})
+    
+    return obstructions
 
-    best_route = None
-    max_shade_coverage = -1
+# API endpoint to calculate shade for a route
+@app.route('/api/calculate_shade', methods=['POST'])
+def api_calculate_shade():
+    try:
+        # Get request data
+        data = request.get_json()
+        
+        start_location = data.get('start_location')  # (latitude, longitude)
+        end_location = data.get('end_location')  # (latitude, longitude)
+        date_time_str = data.get('date_time', '')
+        date_time = datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
+        
+        # Get the route and obstructions
+        route = get_route(start_location, end_location)
+        obstructions = get_nearby_obstructions(route)
+        
+        # Calculate shade percentage for the route
+        shade_percentage = calculate_shade(route, obstructions, None, date_time)
 
-    for route in routes:
-        overview_poly = route['overview_polyline']['points']
-        route_coords = decode_polyline(overview_poly)
-        route_line = LineString(route_coords)
+        return jsonify({'shade_percentage': shade_percentage})
 
-        # Calculate shade overlap
-        shade_overlap = route_line.intersection(shaded_area).length
-        if shade_overlap > max_shade_coverage:
-            max_shade_coverage = shade_overlap
-            best_route = route
-
-    if not best_route:
-        return jsonify({'error': 'No optimal shaded route found.'}), 404
-
-    return jsonify({
-        'route': best_route,
-        'shade_coverage': max_shade_coverage
-    })
-
-def decode_polyline(polyline_str):
-    """Decodes a polyline using Google's algorithm."""
-    import polyline
-    return polyline.decode(polyline_str)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
