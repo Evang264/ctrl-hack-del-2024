@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
   	extend: {
+      width: {
+        "128": "32rem"
+      },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -43,6 +46,7 @@ export default {
         devmodeBg: '#00050A',
         normalBg: '#FFFAF5',
         devmodeLightBg: '#424242',
+        devmodeBlue: '#248AFF',
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
