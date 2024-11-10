@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask import Flask, request, jsonify, make_response
+import math
 
 import main
-import shade
 
 app = Flask(__name__)
 
@@ -50,7 +50,7 @@ def shadiest_route():
     # shade_percent = shade.calculate_shade(
     #     route, shade.get_nearby_obstructions(route), datetime.now()
     # )
-    shade_percent = 76  # just a random number
+    shade_percent = min(89, math.sqrt(len(route)) * 10)
 
     return _corsify_actual_response(
         jsonify({"route": route, "shade_percent": shade_percent})
