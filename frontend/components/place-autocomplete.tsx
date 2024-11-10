@@ -20,10 +20,10 @@ export default function PlaceAutocomplete({ onPlaceSelect, placeholder, isDevMod
     if (!places || !inputRef.current) return;
 
     const bounds: google.maps.LatLngBoundsLiteral = {
-      north: 43.7730390011316,
-      west: -79.53397119378593,
-      south: 43.76335309009073,
-      east: -79.49103024035965
+      north: 43.477679374793965,
+      west: -80.56617994304592,
+      south: 43.464644769488466,
+      east: -80.53314589340809
     }
 
     const options: google.maps.places.AutocompleteOptions = {

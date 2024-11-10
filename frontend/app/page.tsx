@@ -12,7 +12,7 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "
 import { Label, Pie, PieChart } from "recharts";
 import React from "react";
 
-const defaultLocation = { lat: 43.77211663142969, lng: -79.50660297466334 };
+const defaultLocation = { lat: 43.472284474327545, lng: -80.54485482138256 };
 
 // type PrevLocation = {
 //   name: string;
